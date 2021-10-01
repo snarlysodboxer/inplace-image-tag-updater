@@ -26,7 +26,6 @@ func main() {
 	}
 
 	for _, filePath := range filePaths {
-		fmt.Printf("Processing: %s\n", filePath)
 		contents, mode, err := readFileAndPermissions(filePath)
 		if err != nil {
 			log.Fatal(err)
