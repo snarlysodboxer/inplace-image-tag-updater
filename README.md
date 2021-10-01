@@ -6,6 +6,7 @@ Don't touch anything else, leave comments and indentation and everything else.
 ## Why
 * The different `yq`s will either rearrange things or remove your comments or change your styling.
 * `sed`/`awk` approaches are error prone and hard to read and maintain.
+* `kustomize edit set images` also rearranges and restyles your `kustomization.yaml` files.
 
 ```bash
 go build
