@@ -14,6 +14,8 @@ import (
 
 var image = flag.String("image", "", "The image to change the tag for, E.G. 'snarlysodboxer/my-image'")
 var newTag = flag.String("newTag", "", "The new tag to set for this image, E.G. '1.2.3'")
+var searchRegex = flag.String("searchRegex", `image:\s+%s:\S+`, `The regex to use when searching for the image. The %s will be replaced by the escaped -image flag's value.`)
+var replacementFormat = flag.String("replacementFormat", `image: %s:%s`, `The format string to use when creating the replacement string. The %s's will be replaced by the -image and -newTag flags' values.`)
 
 func main() {
 	flag.Parse()
@@ -30,10 +32,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		contents = updateContents(contents, image, newTag)
-		err = ioutil.WriteFile(filePath, contents, mode)
-		if err != nil {
-			log.Fatal(err)
+		newContents := updateContents(contents, image, newTag)
+		if string(newContents) != string(contents) {
+			err = ioutil.WriteFile(filePath, newContents, mode)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		fmt.Printf("Processed: %s\n", filePath)
 	}
@@ -46,6 +50,12 @@ func validateFlags() error {
 	}
 	if *newTag == "" {
 		return errors.New("'-newTag' flag cannot be empty")
+	}
+	if !strings.Contains(*searchRegex, `%s`) {
+		return errors.New("'-searchRegex' must contain '%s'")
+	}
+	if !strings.Contains(*replacementFormat, `%s:%s`) {
+		return errors.New("'-replacementFormat' must contain '%s:%s'")
 	}
 
 	return nil
@@ -84,7 +94,9 @@ func readFileAndPermissions(filePath string) ([]byte, os.FileMode, error) {
 
 func updateContents(contents []byte, img, tag *string) []byte {
 	safeImage := strings.ReplaceAll(*img, `/`, `\/`)
-	regexString := fmt.Sprintf(`image:\s+%s:\S+`, safeImage)
+	regexString := fmt.Sprintf(*searchRegex, safeImage)
 	regex := regexp.MustCompile(regexString)
-	return []byte(regex.ReplaceAllString(string(contents), fmt.Sprintf("image: %s:%s", *img, *tag)))
+	replacementString := fmt.Sprintf(*replacementFormat, *img, *tag)
+
+	return []byte(regex.ReplaceAllString(string(contents), replacementString))
 }
