@@ -15,7 +15,7 @@ inplace-image-tag-updater -h
 # assuming you have Kubernetes specs in a directory called kustomize
 git grep -l snarlysodboxer/my-image: kustomize | inplace-image-tag-updater -image snarlysodboxer/my-image -newTag 1.2.3
 # OR in Docker
-git grep -l snarlysodboxer/my-image: kustomize | docker run -i --rm -v $(pwd):/code snarlysodboxer/inplace-image-tag-updater:latest -image snarlysodboxer/my-image -newTag 1.2.3
+git grep -l snarlysodboxer/my-image: kustomize | docker run -i --rm -v $(pwd):/code snarlysodboxer/inplace-image-tag-updater:v0.0.1 -image snarlysodboxer/my-image -newTag 1.2.3
 ```
 
 ## Customize the search regex and replacement string (Generally not needed)
