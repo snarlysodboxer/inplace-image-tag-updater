@@ -54,8 +54,8 @@ func validateFlags() error {
 	if !strings.Contains(*searchRegex, `%s`) {
 		return errors.New("'-searchRegex' must contain '%s'")
 	}
-	if !strings.Contains(*replacementFormat, `%s:%s`) {
-		return errors.New("'-replacementFormat' must contain '%s:%s'")
+	if !strings.Contains(*replacementFormat, `%s`) {
+		return errors.New("'-replacementFormat' must contain '%s' twice")
 	}
 
 	return nil
@@ -96,6 +96,8 @@ func updateContents(contents []byte, img, tag *string) []byte {
 	safeImage := strings.ReplaceAll(*img, `/`, `\/`)
 	regexString := fmt.Sprintf(*searchRegex, safeImage)
 	regex := regexp.MustCompile(regexString)
+	// convert raw \n to actual \n
+	*replacementFormat = strings.Replace(*replacementFormat, `\n`, "\n", -1)
 	replacementString := fmt.Sprintf(*replacementFormat, *img, *tag)
 
 	return []byte(regex.ReplaceAllString(string(contents), replacementString))
