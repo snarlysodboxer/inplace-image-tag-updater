@@ -22,9 +22,10 @@ func main() {
 	if err := validateFlags(); err != nil {
 		log.Fatal(err)
 	}
-	filePaths := getFilePathsFromStdin()
-	if len(filePaths) < 1 {
-		log.Fatal("Error: no file paths passed to stdin")
+
+	filePaths, err := getFilePathsFromStdin()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, filePath := range filePaths {
@@ -61,7 +62,7 @@ func validateFlags() error {
 	return nil
 }
 
-func getFilePathsFromStdin() []string {
+func getFilePathsFromStdin() ([]string, error) {
 	filePaths := make([]string, 0)
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -73,10 +74,13 @@ func getFilePathsFromStdin() []string {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "shouldn't see an error scanning a string")
+		return filePaths, err
+	}
+	if len(filePaths) < 1 {
+		return filePaths, errors.New("Error: no file paths passed to stdin")
 	}
 
-	return filePaths
+	return filePaths, nil
 }
 
 func readFileAndPermissions(filePath string) ([]byte, os.FileMode, error) {
